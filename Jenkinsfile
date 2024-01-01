@@ -1,40 +1,53 @@
-pipeline {
-    agent { label "dev-server"}
+pipeline{
+    agent any
     
-    stages {
+    stages{
         
-        stage("code"){
+        stage('Code')
+        {
             steps{
-                git url: "https://github.com/LondheShubham153/node-todo-cicd.git", branch: "master"
-                echo 'bhaiyya code clone ho gaya'
+                 git url: 'https://github.com/UtkanshAdlakha123/node-todo-cicd.git', branch : 'master'           
+                 echo 'Clone the code from repo'
             }
         }
-        stage("build and test"){
+        
+        stage('Build')
+        {
             steps{
-                sh "docker build -t node-app-test-new ."
-                echo 'code build bhi ho gaya'
+                sh 'docker build -t adlakhautkansh22/1stjan2ndimg .'
+                echo 'build the image'
             }
         }
-        stage("scan image"){
-            steps{
-                echo 'image scanning ho gayi'
+        
+        stage('Push')
+        {
+            steps
+            {
+                script{
+                    
+                    withCredentials([string(credentialsId: 'dockerhub-token', variable: 'DOCKERHUB_TOKEN')]) {
+                        
+                        def dockerhubToken = env.DOCKERHUB_TOKEN
+                        
+                        // Login to Docker Hub using the access token
+                        sh "echo ${dockerhubToken} | docker login -u adlakhautkansh22 --password-stdin"
+                        
+                        // Build and push your Docker image
+        //                sh "docker build -t adlakhautkansh22/myhttpdimage ."
+                        sh "docker push adlakhautkansh22/1stjan2ndimg"
+                    }
+                    
+                }    
             }
         }
-        stage("push"){
+        
+        stage('Deploy'){
+        
             steps{
-                withCredentials([usernamePassword(credentialsId:"dockerHub",passwordVariable:"dockerHubPass",usernameVariable:"dockerHubUser")]){
-                sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPass}"
-                sh "docker tag node-app-test-new:latest ${env.dockerHubUser}/node-app-test-new:latest"
-                sh "docker push ${env.dockerHubUser}/node-app-test-new:latest"
-                echo 'image push ho gaya'
-                }
+                sh 'docker-compose down'
+                sh 'docker-compose up -d'
             }
         }
-        stage("deploy"){
-            steps{
-                sh "docker-compose down && docker-compose up -d"
-                echo 'deployment ho gayi'
-            }
-        }
+        
     }
 }
