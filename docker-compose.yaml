@@ -2,6 +2,6 @@ version: '3.9'
 
 services:
   web:
-    image: "trainwithshubham/node-app-test-new:latest"
+    image: "adlakhautkansh22/1stjanimg:latest"
     ports:
       - "8000:8000"
